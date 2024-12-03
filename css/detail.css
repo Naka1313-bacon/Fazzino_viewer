@@ -1,0 +1,100 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+main {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#modelContainer {
+    flex: 1;
+    height: 40%;
+}
+
+#info-panel {
+    width: 20%;
+    margin-right: 5%;
+    margin-top: 5%;
+    padding: 10px;
+    background-color: rgba(192, 183, 183, 0.6);
+    border-left: 1px #ddd;
+    border-radius: 10%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    font-family: 'Kosugi Maru', sans-serif;
+    align-items: center;
+    text-align: center;
+}
+
+
+
+#info-panel table {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    
+}
+
+#info-panel tr {
+    width: 100%;
+    text-align: center;
+}
+
+#info-panel td {
+    width: 50%;
+    
+}
+#info-panel th {
+    width: 5%;
+    border: 1px solid #ddd;
+}
+#info-panel td:first-child {
+    font-weight: bold;
+}
+
+#skyboxSelector {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 20;
+    padding: 5px;
+    font-size: 14px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    #info-panel {
+        height: 110px;
+        width: 190px;
+        margin-right: 5%;
+        margin-top: 5%;
+        background-color: rgba(192, 183, 183, 0.6);
+        border-left: 1px #ddd;
+        border-radius: 10%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+        font-family: 'Kosugi Maru', sans-serif;
+        
+    }
+
+    #info-panel td {
+        font-size: 12px;
+    }
+    #info-panel th {
+        font-size: 18px;
+        width: 20px;
+        padding: 5px;
+        border: 1px solid #ddd;
+    }
+
+}

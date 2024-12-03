@@ -1,0 +1,87 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+main {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#modelContainer {
+    flex: 1;
+    height: 100%;
+    cursor: default;
+}
+
+#modelContainer.cursor-pointer {
+    cursor: pointer; 
+}
+
+#skyboxSelector {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 20;
+    padding: 5px;
+    font-size: 14px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+#plyupload {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ff69b4;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.upload-label:hover {
+    background-color: #ff85c1;
+}
+@media (max-width: 768px) {
+    #info-panel {
+        width: 30%;
+        margin-right: 5%;
+        margin-top: 5%;
+        padding: 20px;
+        background-color: rgba(192, 183, 183, 0.6);
+        border-left: 1px #ddd;
+        border-radius: 10%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+        font-family: 'Kosugi Maru', sans-serif;
+        
+    }
+
+    #info-panel td {
+        
+        font-size: 12px;
+        padding: 5px;
+    }
+    #info-panel th {
+        font-size: 18px;
+        width: 20px;
+        padding: 5px;
+        border: 1px solid #ddd;
+    }
+
+}
