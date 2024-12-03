@@ -34,6 +34,7 @@ main {
 
 
 #start-ar {
+    position: absolute;
     z-index: 10;
 }
 #info-panel table {
