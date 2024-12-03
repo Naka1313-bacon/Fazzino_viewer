@@ -11,7 +11,7 @@ registerOrbitCameraScript(app);
 registerOrbitCameraInputMouseScript(app);
 registerOrbitCameraInputTouchScript(app);
 // Fill the available space at full resolution
-app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+
 function isMobileDevice() {
     return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 }
@@ -25,7 +25,7 @@ if (isMobileDevice()) {
 }
 
 // Resize the canvas when the window is resized
-window.addEventListener('resize', () => app.resizeCanvas());
+
 app.start();
 
 
