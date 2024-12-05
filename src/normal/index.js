@@ -73,49 +73,37 @@ document.getElementById('start-ar').addEventListener('click', function () {
         app.xr.on('start', function () {
             console.log("ARセッションが開始されました");
 
-            app.touch.on('touchstart', function (event) {
+            document.addEventListener('touchstart', function (event) {
                 const touch = event.touches[0];
-                const touchX = touch.x;
-                const touchY = touch.y;
+                const touchX = touch.clientX;
+                const touchY = touch.clientY;
 
                 console.log(`タッチ位置: x=${touchX}, y=${touchY}`);
 
-                if (!app.xr.session) {
-                    console.error("WebXRセッションが開始されていません");
-                    return;
-                }
-
-                // スクリーン座標をAR空間に変換
-                const xrFrame = app.xr.frame;
-                const referenceSpace = app.xr.session.referenceSpace;
-
-                // レイキャストを実行
-                const ray = new pc.Ray();
-                app.camera.screenToWorld(touchX, touchY, camera.camera.nearClip, ray.origin);
-                app.camera.screenToWorld(touchX, touchY, camera.camera.farClip, ray.direction);
-
-                // Raycastからヒットテストを実行
                 app.xr.session.requestHitTestSource({
                     space: app.xr.session.viewerSpace
                 }).then((hitTestSource) => {
-                    const hitResults = xrFrame.getHitTestResults(hitTestSource);
-                    if (hitResults.length > 0) {
-                        const hitPose = hitResults[0].getPose(referenceSpace);
-                        if (hitPose) {
-                            console.log("ヒット位置:", hitPose.transform.position);
+                    console.log("ヒットテストソースが作成されました");
 
-                            // タッチ位置にモデルを配置
-                            entity.setPosition(
-                                hitPose.transform.position.x,
-                                hitPose.transform.position.y,
-                                hitPose.transform.position.z
-                            );
+                    app.xr.on('update', function (frame) {
+                        const referenceSpace = app.xr.session.referenceSpace;
+                        const hitResults = frame.getHitTestResults(hitTestSource);
+                        if (hitResults.length > 0) {
+                            const hitPose = hitResults[0].getPose(referenceSpace);
+                            if (hitPose) {
+                                console.log("ヒット位置:", hitPose.transform.position);
+                                entity.setPosition(
+                                    hitPose.transform.position.x,
+                                    hitPose.transform.position.y,
+                                    hitPose.transform.position.z
+                                );
+                            }
+                        } else {
+                            console.log("ヒットする平面が見つかりませんでした");
                         }
-                    } else {
-                        console.log("ヒットする平面が見つかりませんでした");
-                    }
+                    });
                 }).catch((err) => {
-                    console.error("ヒットテストエラー:", err);
+                    console.error("ヒットテストの作成に失敗:", err);
                 });
             });
         });
