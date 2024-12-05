@@ -66,29 +66,27 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     entity.gsplat.asset = asset;
 });
 
-// Start AR mode
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR).then(() => {
             console.log("ARモードが開始されました");
-            entity.setLocalScale(0.01, 0.01, 0.01);
-            // Listen for touch events
-            app.touch.on('touchstart', function (event) {
-                const touchX = event.touches[0].x;
-                const touchY = event.touches[0].y;
 
-                // Perform hit testing
-                const session = app.xr.session;
-                const xrFrame = app.xr.frame;
-                const referenceSpace = session.referenceSpace;
+            // WebXRのヒットテスト設定
+            app.xr.session.requestHitTestSourceForTransientInput({
+                profile: "generic-touchscreen"
+            }).then((hitTestSource) => {
+                app.touch.on('touchstart', function (event) {
+                    const touchX = event.touches[0].x;
+                    const touchY = event.touches[0].y;
 
-                const viewerSpace = session.viewerSpace;
-                xrFrame.requestHitTestSource({ space: viewerSpace }).then((hitTestSource) => {
-                    const hitResults = xrFrame.getHitTestResults(hitTestSource);
+                    // タッチ位置からヒットテストを実行
+                    const frame = app.xr.frame;
+                    const referenceSpace = app.xr.session.referenceSpace;
+                    const hitResults = frame.getHitTestResults(hitTestSource);
                     if (hitResults.length > 0) {
                         const hitPose = hitResults[0].getPose(referenceSpace);
                         if (hitPose) {
-                            // Place model at hit position
+                            // モデルを配置
                             entity.setPosition(
                                 hitPose.transform.position.x,
                                 hitPose.transform.position.y,
@@ -96,9 +94,9 @@ document.getElementById('start-ar').addEventListener('click', function () {
                             );
                         }
                     }
-                }).catch((err) => {
-                    console.error("ヒットテストの失敗:", err);
                 });
+            }).catch((err) => {
+                console.error("ヒットテストの初期化に失敗:", err);
             });
         }).catch((err) => {
             console.error("ARモードの開始に失敗しました:", err);
