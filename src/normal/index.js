@@ -96,6 +96,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
                                 hitPose.transform.position.y,
                                 hitPose.transform.position.z
                             );
+                            console.log('model replaced')
                         }
                     }
                 });
