@@ -73,34 +73,34 @@ document.getElementById('start-ar').addEventListener('click', function () {
         app.xr.on('start', function () {
             console.log("ARセッションが開始されました");
 
-            // タッチイベントリスナーを追加
-            app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
-                const touch = event.touches[0];
-                console.log(`タッチ開始: x=${touch.x}, y=${touch.y}`);
+            // // タッチイベントリスナーを追加
+            // app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
+            //     const touch = event.touches[0];
+            //     console.log(`タッチ開始: x=${touch.x}, y=${touch.y}`);
 
-                // WebXRヒットテスト処理
-                if (app.xr.session) {
-                    const xrFrame = app.xr.frame;
-                    const referenceSpace = app.xr.session.referenceSpace;
+            //     // WebXRヒットテスト処理
+            //     if (app.xr.session) {
+            //         const xrFrame = app.xr.frame;
+            //         const referenceSpace = app.xr.session.referenceSpace;
 
-                    app.xr.session.requestHitTestSource({ space: app.xr.session.viewerSpace }).then((hitTestSource) => {
-                        const hitResults = xrFrame.getHitTestResults(hitTestSource);
-                        if (hitResults.length > 0) {
-                            const hitPose = hitResults[0].getPose(referenceSpace);
-                            console.log("ヒット位置:", hitPose.transform.position);
+            //         app.xr.session.requestHitTestSource({ space: app.xr.session.viewerSpace }).then((hitTestSource) => {
+            //             const hitResults = xrFrame.getHitTestResults(hitTestSource);
+            //             if (hitResults.length > 0) {
+            //                 const hitPose = hitResults[0].getPose(referenceSpace);
+            //                 console.log("ヒット位置:", hitPose.transform.position);
 
-                            // モデルを配置
-                            entity.setPosition(
-                                hitPose.transform.position.x,
-                                hitPose.transform.position.y,
-                                hitPose.transform.position.z
-                            );
-                        }
-                    }).catch((err) => {
-                        console.error("ヒットテストエラー:", err);
-                    });
-                }
-            });
+            //                 // モデルを配置
+            //                 entity.setPosition(
+            //                     hitPose.transform.position.x,
+            //                     hitPose.transform.position.y,
+            //                     hitPose.transform.position.z
+            //                 );
+            //             }
+            //         }).catch((err) => {
+            //             console.error("ヒットテストエラー:", err);
+            //         });
+            //     }
+            // });
         });
 
         app.xr.on('end', function () {
