@@ -68,7 +68,11 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
-        camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR).then(() => {
+        // ARモード開始
+        camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR);
+
+        // ARモードが開始したときの処理
+        app.xr.on('start', function () {
             console.log("ARモードが開始されました");
 
             // WebXRのヒットテスト設定
@@ -98,14 +102,16 @@ document.getElementById('start-ar').addEventListener('click', function () {
             }).catch((err) => {
                 console.error("ヒットテストの初期化に失敗:", err);
             });
-        }).catch((err) => {
-            console.error("ARモードの開始に失敗しました:", err);
+        });
+
+        // ARモードが終了したときの処理
+        app.xr.on('end', function () {
+            console.log("ARモードが終了しました");
         });
     } else {
         console.warn("WebXR (AR) が利用できません");
     }
 });
-
 app.on('update', function (dt) {
     // Scene updates and animations
 });
