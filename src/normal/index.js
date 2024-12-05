@@ -38,7 +38,11 @@ app.root.addChild(entity);
 entity.addComponent('gsplat', {
     // GSplat-related properties
 });
-
+var material = new pc.StandardMaterial();
+material.opacity = 1; // 完全に不透明に設定
+material.blendType = pc.BLEND_NONE; // ブレンドを無効化
+material.update(); // 変更を適用
+entity.gsplat.material = material;
 // Add a camera
 var camera = new pc.Entity('camera');
 camera.addComponent('camera', {});
