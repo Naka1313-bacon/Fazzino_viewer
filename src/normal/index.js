@@ -67,7 +67,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR).then(() => {
             console.log("ARモードが開始されました");
-
+            entity.setLocalScale(0.1, 0.1, 0.1);
             // Listen for touch events
             app.touch.on('touchstart', function (event) {
                 const touchX = event.touches[0].x;
