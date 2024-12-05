@@ -68,46 +68,60 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
-        // ARモード開始
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR);
 
-        // ARモードが開始したときの処理
         app.xr.on('start', function () {
-            console.log("ARモードが開始されました");
+            console.log("ARセッションが開始されました");
 
-            // WebXRのヒットテスト設定
-            app.xr.session.requestHitTestSourceForTransientInput({
-                profile: "generic-touchscreen"
-            }).then((hitTestSource) => {
-                app.touch.on('touchstart', function (event) {
-                    const touchX = event.touches[0].x;
-                    const touchY = event.touches[0].y;
+            app.touch.on('touchstart', function (event) {
+                const touch = event.touches[0];
+                const touchX = touch.x;
+                const touchY = touch.y;
 
-                    // タッチ位置からヒットテストを実行
-                    const frame = app.xr.frame;
-                    const referenceSpace = app.xr.session.referenceSpace;
-                    const hitResults = frame.getHitTestResults(hitTestSource);
+                console.log(`タッチ位置: x=${touchX}, y=${touchY}`);
+
+                if (!app.xr.session) {
+                    console.error("WebXRセッションが開始されていません");
+                    return;
+                }
+
+                // スクリーン座標をAR空間に変換
+                const xrFrame = app.xr.frame;
+                const referenceSpace = app.xr.session.referenceSpace;
+
+                // レイキャストを実行
+                const ray = new pc.Ray();
+                app.camera.screenToWorld(touchX, touchY, camera.camera.nearClip, ray.origin);
+                app.camera.screenToWorld(touchX, touchY, camera.camera.farClip, ray.direction);
+
+                // Raycastからヒットテストを実行
+                app.xr.session.requestHitTestSource({
+                    space: app.xr.session.viewerSpace
+                }).then((hitTestSource) => {
+                    const hitResults = xrFrame.getHitTestResults(hitTestSource);
                     if (hitResults.length > 0) {
                         const hitPose = hitResults[0].getPose(referenceSpace);
                         if (hitPose) {
-                            // モデルを配置
+                            console.log("ヒット位置:", hitPose.transform.position);
+
+                            // タッチ位置にモデルを配置
                             entity.setPosition(
                                 hitPose.transform.position.x,
                                 hitPose.transform.position.y,
                                 hitPose.transform.position.z
                             );
-                            console.log('model replaced')
                         }
+                    } else {
+                        console.log("ヒットする平面が見つかりませんでした");
                     }
+                }).catch((err) => {
+                    console.error("ヒットテストエラー:", err);
                 });
-            }).catch((err) => {
-                console.error("ヒットテストの初期化に失敗:", err);
             });
         });
 
-        // ARモードが終了したときの処理
         app.xr.on('end', function () {
-            console.log("ARモードが終了しました");
+            console.log("ARセッションが終了しました");
         });
     } else {
         console.warn("WebXR (AR) が利用できません");
