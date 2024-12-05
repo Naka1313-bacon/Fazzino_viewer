@@ -45,7 +45,7 @@ entity.addComponent('gsplat', {
 
 var camera = new pc.Entity('camera');
 camera.addComponent('camera', {
-    clearColor: new pc.Color(1, 1, 1)
+    
 });
 
 camera.addComponent('script');
@@ -56,8 +56,7 @@ camera.script.create('orbitCamera', {
 });
 camera.script.create('orbitCameraInputMouse');
 camera.script.create('orbitCameraInputTouch');
-camera.script.create('arBasic');
-camera.camera.clearFlags = pc.CLEARFLAG_DEPTH;
+camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
 app.root.addChild(camera);
 
 app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
