@@ -57,7 +57,7 @@ camera.script.create('orbitCamera', {
 camera.script.create('orbitCameraInputMouse');
 camera.script.create('orbitCameraInputTouch');
 camera.script.create('arBasic');
-
+camera.camera.clearFlags = pc.CLEARFLAG_DEPTH;
 app.root.addChild(camera);
 
 app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
