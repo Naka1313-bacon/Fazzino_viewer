@@ -37,29 +37,7 @@ app.root.addChild(entity);
 entity.addComponent('gsplat', {
     // GSplat-related properties
 });
-
-// 初期はモデルを非表示にしておく
-entity.enabled = false;
-
-// AR用変数
-let hitTestSource = null;
-let localReferenceSpace = null;
-let placeModelRequested = false; // タッチでモデルを配置したいことを示すフラグ
-
-// Reticle (レティクル)用エンティティを作成
-const reticle = new pc.Entity("reticle");
-reticle.enabled = false; // 初期は非表示
-reticle.addComponent('model', {
-    type: 'plane'
-});
-const reticleMat = new pc.StandardMaterial();
-reticleMat.diffuse = new pc.Color(1, 1, 1);
-reticleMat.opacity = 0.5; // 半透明
-reticleMat.update();
-reticle.model.material = reticleMat;
-// レティクルを少し小さく
-reticle.setLocalScale(0.2, 0.2, 0.2);
-app.root.addChild(reticle);
+entity.enabled = false; // 初期は非表示
 
 // Add a camera
 var camera = new pc.Entity('camera');
@@ -76,7 +54,6 @@ camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
 
 const worldLayer = app.scene.layers.getLayerByName("World");
 camera.camera.layers = [worldLayer.id];
-
 app.root.addChild(camera);
 
 // Load the model
@@ -89,6 +66,27 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     entity.gsplat.asset = asset;
 });
 
+// AR用変数（グローバルスコープ）
+let hitTestSource = null;
+let localReferenceSpace = null;
+let placeModelRequested = false; 
+
+// Reticle (レティクル)用エンティティを作成
+const reticle = new pc.Entity("reticle");
+reticle.enabled = false; // 初期は非表示
+reticle.addComponent('model', {
+    type: 'plane'
+});
+const reticleMat = new pc.StandardMaterial();
+reticleMat.diffuse = new pc.Color(1, 1, 1);
+reticleMat.opacity = 0.5; // 半透明
+reticleMat.update();
+reticle.model.material = reticleMat;
+// レティクルを少し小さく
+reticle.setLocalScale(0.2, 0.2, 0.2);
+app.root.addChild(reticle);
+
+// AR開始ボタンイベント
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
@@ -101,27 +99,27 @@ document.getElementById('start-ar').addEventListener('click', function () {
             console.log("ARセッションが開始されました");
             const session = app.xr.session;
 
+            // localReferenceSpaceとhitTestSourceを取得
             const viewerSpace = await session.requestReferenceSpace('viewer');
             localReferenceSpace = await session.requestReferenceSpace('local-floor');
 
-            // ヒットテストソースを取得
             try {
                 hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+                console.log("hitTestSource取得成功");
             } catch (err) {
                 console.error("ヒットテストソース取得エラー:", err);
             }
 
-            // タッチイベントをdocumentで取得
-            document.addEventListener('touchstart', function (event) {
-                console.log('タッチ開始:', event.touches[0].clientX, event.touches[0].clientY);
-                // タッチ時にフラグ立て
+            // ポインターイベントでモデル配置要求を受け付け
+            document.addEventListener('pointerdown', function (event) {
+                console.log('pointerdown発生:', event.clientX, event.clientY);
                 placeModelRequested = true;
             }, { passive: true });
         });
 
         // ARセッション中の毎フレーム処理
         app.xr.on('update', function (xrFrame) {
-            if (!hitTestSource || !xrFrame) return;
+            if (!hitTestSource || !xrFrame || !localReferenceSpace) return;
 
             const hitResults = xrFrame.getHitTestResults(hitTestSource);
             if (hitResults.length > 0) {
@@ -135,7 +133,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         hitPose.transform.position.z
                     );
 
-                    // タッチでモデル配置要求が出ていたらレティクル位置にモデル配置
+                    // モデル配置要求があれば現在のreticle位置へモデル配置
                     if (placeModelRequested) {
                         entity.setPosition(
                             hitPose.transform.position.x,
@@ -145,6 +143,9 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         entity.enabled = true; // モデル表示
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
+
+                        // モデル配置後、reticleを消したい場合
+                        reticle.enabled = false;
                     }
                 }
             } else {
