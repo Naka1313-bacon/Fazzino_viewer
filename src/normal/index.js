@@ -85,7 +85,7 @@ reticle.model.material = reticleMat;
 // レティクルを少し小さく
 reticle.setLocalScale(0.2, 0.2, 0.2);
 app.root.addChild(reticle);
-
+const overlay = document.getElementById("overlay");
 // AR開始ボタンイベント
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
@@ -111,7 +111,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
             }
 
             // ポインターイベントでモデル配置要求を受け付け
-            document.addEventListener('pointerdown', function (event) {
+            overlay.addEventListener('pointerdown', function (event) {
                 console.log('pointerdown発生:', event.clientX, event.clientY);
                 placeModelRequested = true;
             }, { passive: true });
