@@ -71,11 +71,8 @@ material.opacity = 1.0;          // 不透明
 material.blendType = pc.BLEND_NONE; // ブレンド無効化（不透明描画）
 material.update();
 
-if (entity.gsplat.model && entity.gsplat.model.model && entity.gsplat.model.model.meshInstances) {
-    entity.gsplat.model.model.meshInstances.forEach((meshInstance) => {
-        meshInstance.material = material;
-    });
-}
+// もしgsplatを使っているなら
+entity.gsplat.instance.material = material;
 let hitTestSource = null;
 let localReferenceSpace = null;
 let placeModelRequested = false; 
