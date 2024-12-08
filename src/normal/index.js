@@ -64,8 +64,11 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     }
     entity.gsplat.asset = asset;
     const material = new pc.StandardMaterial();
-    material.opacity = 1.0;          // 不透明
-    material.blendType = pc.BLEND_NONE; // ブレンド無効化（不透明描画）
+    material.diffuse = new pc.Color(1, 1, 1);
+    material.emissive = new pc.Color(1, 1, 1); // 発光させる
+    material.emissiveIntensity = 1;
+    material.blendType = pc.BLEND_NONE;
+    material.opacity = 1;
     material.update();
 
     asset.ready(function (resource) {
