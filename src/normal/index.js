@@ -75,60 +75,63 @@ let placeModelRequested = false; // タッチでモデルを配置したいこ�
 
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
-        camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR);
+        // hit-testを必須機能として要求
+        camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],
+            // dom-overlayでUIを表示するには以下のようなオプションも必要:
+            domOverlay: { root: document.body }
+        });
 
-        // ARセッション開始時
         app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
             const session = app.xr.session;
 
-            // viewerスペースを確保
-            viewerSpace = await session.requestReferenceSpace('viewer');
-            // local-floorのリファレンススペースも再取得（PlayCanvasが内部で行っているはずですが明示的に行う例）
-            localReferenceSpace = await session.requestReferenceSpace('local-floor');
+            // viewerSpaceとlocalReferenceSpaceを取得
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            const localReferenceSpace = await session.requestReferenceSpace('local-floor');
 
-            // ヒットテストソースの設定
+            // ヒットテストソースを取得
+            let hitTestSource = null;
             try {
                 hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
             } catch (err) {
                 console.error("ヒットテストソース取得エラー:", err);
             }
 
-            // タッチイベント：モデル配置要求をフラグで制御する
-            app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
-                const touch = event.touches[0];
-                console.log(`タッチ開始: x=${touch.x}, y=${touch.y}`);
-                // ここではただフラグを立てる
+            // 初期状態でモデルを非表示
+            entity.enabled = false;
+            
+            // タッチイベントの代わりにdocumentで取得
+            document.addEventListener('touchstart', function (event) {
+                console.log('タッチ開始:', event.touches[0].clientX, event.touches[0].clientY);
+                // タッチ時にフラグ立て
                 placeModelRequested = true;
-            });
-        });
+            }, { passive: true });
 
-        // ARセッション中に毎フレーム呼ばれるイベント
-        app.xr.on('update', function (xrFrame) {
-            if (!hitTestSource || !xrFrame) return;
+            // ARセッション中毎フレームのアップデート
+            app.xr.on('update', function (xrFrame) {
+                if (!hitTestSource || !xrFrame) return;
 
-            const hitResults = xrFrame.getHitTestResults(hitTestSource);
-            if (hitResults.length > 0) {
-                const hitPose = hitResults[0].getPose(localReferenceSpace);
-                if (placeModelRequested && hitPose) {
-                    // ヒットポーズが得られたらモデル配置
-                    entity.setPosition(
-                        hitPose.transform.position.x,
-                        hitPose.transform.position.y,
-                        hitPose.transform.position.z
-                    );
-
-                    console.log("モデル配置位置:", hitPose.transform.position);
-                    placeModelRequested = false; // フラグリセット
+                const hitResults = xrFrame.getHitTestResults(hitTestSource);
+                if (hitResults.length > 0) {
+                    const hitPose = hitResults[0].getPose(localReferenceSpace);
+                    if (hitPose && placeModelRequested) {
+                        entity.setPosition(
+                            hitPose.transform.position.x,
+                            hitPose.transform.position.y,
+                            hitPose.transform.position.z
+                        );
+                        entity.enabled = true; // 初回配置時に有効化
+                        console.log("モデル配置位置:", hitPose.transform.position);
+                        placeModelRequested = false;
+                    }
                 }
-            }
+            });
         });
 
         app.xr.on('end', function () {
             console.log("ARセッションが終了しました");
-            hitTestSource = null;
-            viewerSpace = null;
-            localReferenceSpace = null;
             placeModelRequested = false;
         });
     } else {
