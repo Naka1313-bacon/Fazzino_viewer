@@ -66,8 +66,13 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     }
     entity.gsplat.asset = asset;
 });
+const material = new pc.StandardMaterial();
+material.opacity = 1.0;          // 不透明
+material.blendType = pc.BLEND_NONE; // ブレンド無効化（不透明描画）
+material.update();
 
-// AR用変数
+// もしgsplatを使っているなら
+entity.gsplat.material = material;
 let hitTestSource = null;
 let localReferenceSpace = null;
 let placeModelRequested = false; 
