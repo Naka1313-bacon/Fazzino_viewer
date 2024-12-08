@@ -54,6 +54,7 @@ camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
 
 const worldLayer = app.scene.layers.getLayerByName("World");
 camera.camera.layers = [worldLayer.id];
+
 app.root.addChild(camera);
 
 // Load the model
@@ -66,7 +67,7 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     entity.gsplat.asset = asset;
 });
 
-// AR用変数（グローバルスコープ）
+// AR用変数
 let hitTestSource = null;
 let localReferenceSpace = null;
 let placeModelRequested = false; 
@@ -82,46 +83,53 @@ reticleMat.diffuse = new pc.Color(1, 1, 1);
 reticleMat.opacity = 0.5; // 半透明
 reticleMat.update();
 reticle.model.material = reticleMat;
-// レティクルを少し小さく
 reticle.setLocalScale(0.2, 0.2, 0.2);
 app.root.addChild(reticle);
-const overlay = document.getElementById("overlay");
-// AR開始ボタンイベント
+
+// AR開始ボタン
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
-            requiredFeatures: ['hit-test'],
-            optionalFeatures: ['dom-overlay'],
-            domOverlay: { root: overlay }
+            requiredFeatures: ['hit-test'] // ヒットテストが必須
         });
 
-        app.xr.on('start', function () {
+        app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
-            
-            // WebXR input events
-            // ユーザーが画面をタップ(=select)した時に呼ばれる
+            const session = app.xr.session;
+
+            const viewerSpace = await session.requestReferenceSpace('viewer');
+            localReferenceSpace = await session.requestReferenceSpace('local-floor');
+
+            try {
+                hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+                console.log("HitTestSource取得成功");
+            } catch (err) {
+                console.error("ヒットテストソース取得エラー:", err);
+            }
+
+            // WebXR inputのselectイベント（ユーザーが画面をタップすると発生）
             app.xr.input.on('select', function (inputSource) {
                 console.log('select event detected');
-                // タップされたのでモデル配置要求をセット
                 placeModelRequested = true;
             });
         });
-        
-        // 毎フレームのヒットテスト処理
+
+        // ARセッション中の毎フレーム処理
         app.xr.on('update', function (xrFrame) {
             if (!hitTestSource || !xrFrame || !localReferenceSpace) return;
-        
+
             const hitResults = xrFrame.getHitTestResults(hitTestSource);
             if (hitResults.length > 0) {
                 const hitPose = hitResults[0].getPose(localReferenceSpace);
                 if (hitPose) {
+                    // ヒット結果がある場合レティクルを表示・位置更新
                     reticle.enabled = true;
                     reticle.setPosition(
                         hitPose.transform.position.x,
                         hitPose.transform.position.y,
                         hitPose.transform.position.z
                     );
-        
+
                     if (placeModelRequested) {
                         entity.setPosition(
                             hitPose.transform.position.x,
@@ -131,10 +139,12 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         entity.enabled = true;
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
-                        // 必要ならreticle.enabled = false;でレティクル非表示
+                        // 必要に応じてreticleを非表示
+                        // reticle.enabled = false;
                     }
                 }
             } else {
+                // ヒットがない場合はレティクル非表示
                 reticle.enabled = false;
             }
         });
