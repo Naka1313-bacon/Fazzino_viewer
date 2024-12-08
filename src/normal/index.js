@@ -4,10 +4,6 @@ import { registerOrbitCameraScript, registerOrbitCameraInputMouseScript, registe
 
 const canvas = document.getElementById("modelContainer");
 const app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), touch: new pc.TouchDevice(canvas) });
-
-// 必要に応じてCSSでcanvasを前面に出す
-canvas.style.pointerEvents = 'auto';
-
 registerRotatorScript(app);
 registerARScript(app);
 registerOrbitCameraScript(app);
@@ -70,7 +66,7 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
     entity.gsplat.asset = asset;
 });
 
-// AR用変数
+// AR用変数（グローバルスコープ）
 let hitTestSource = null;
 let localReferenceSpace = null;
 let placeModelRequested = false; 
@@ -86,45 +82,42 @@ reticleMat.diffuse = new pc.Color(1, 1, 1);
 reticleMat.opacity = 0.5; // 半透明
 reticleMat.update();
 reticle.model.material = reticleMat;
+// レティクルを少し小さく
 reticle.setLocalScale(0.2, 0.2, 0.2);
 app.root.addChild(reticle);
-
-// 既存コード省略
-
+const overlay = document.getElementById("overlay");
+// AR開始ボタンイベント
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
-            requiredFeatures: ['hit-test']
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],
+            domOverlay: { root: overlay }
         });
 
         app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
-
-            // AR開始後に入力デバイスを再初期化
-            if (app.touch) {
-                app.touch.detach();
-            }
-            app.touch = new pc.TouchDevice(canvas);
-
-            // Touchイベント設定
-            app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
-                if (event.touches.length > 0) {
-                    console.log('タッチ検出:', event.touches[0].x, event.touches[0].y);
-                    placeModelRequested = true;
-                }
-            });
-
             const session = app.xr.session;
+
+            // localReferenceSpaceとhitTestSourceを取得
             const viewerSpace = await session.requestReferenceSpace('viewer');
             localReferenceSpace = await session.requestReferenceSpace('local-floor');
 
             try {
                 hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+                console.log("hitTestSource取得成功");
             } catch (err) {
                 console.error("ヒットテストソース取得エラー:", err);
             }
+
+            // ポインターイベントでモデル配置要求を受け付け
+            overlay.addEventListener('pointerdown', function (event) {
+                console.log('pointerdown発生:', event.clientX, event.clientY);
+                placeModelRequested = true;
+            }, { passive: true });
         });
 
+        // ARセッション中の毎フレーム処理
         app.xr.on('update', function (xrFrame) {
             if (!hitTestSource || !xrFrame || !localReferenceSpace) return;
 
@@ -132,6 +125,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
             if (hitResults.length > 0) {
                 const hitPose = hitResults[0].getPose(localReferenceSpace);
                 if (hitPose) {
+                    // ヒット結果がある場合レティクルを表示・位置更新
                     reticle.enabled = true;
                     reticle.setPosition(
                         hitPose.transform.position.x,
@@ -139,18 +133,23 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         hitPose.transform.position.z
                     );
 
+                    // モデル配置要求があれば現在のreticle位置へモデル配置
                     if (placeModelRequested) {
                         entity.setPosition(
                             hitPose.transform.position.x,
                             hitPose.transform.position.y,
                             hitPose.transform.position.z
                         );
-                        entity.enabled = true;
+                        entity.enabled = true; // モデル表示
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
+
+                        // モデル配置後、reticleを消したい場合
+                        reticle.enabled = false;
                     }
                 }
             } else {
+                // ヒットがない場合はレティクル非表示
                 reticle.enabled = false;
             }
         });
@@ -170,4 +169,3 @@ document.getElementById('start-ar').addEventListener('click', function () {
 app.on('update', function (dt) {
     // 通常シーン更新処理
 });
-
