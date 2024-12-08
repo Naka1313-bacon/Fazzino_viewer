@@ -136,6 +136,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
                             hitPose.transform.position.y,
                             hitPose.transform.position.z
                         );
+                        entity.setLocalScale(0.1, 0.1, 0.1);
                         entity.enabled = true;
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
