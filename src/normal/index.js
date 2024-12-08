@@ -42,8 +42,7 @@ entity.enabled = false; // 初期は非表示
 // Add a camera
 var camera = new pc.Entity('camera');
 camera.addComponent('camera', {
-    clearFlags: pc.CLEARFLAG_DEPTH_ONLY,
-    clearColor: new pc.Color(0, 0, 0, 0)
+
 });
 camera.addComponent('script');
 camera.script.create('orbitCamera', {
