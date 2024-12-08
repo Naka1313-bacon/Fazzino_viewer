@@ -92,7 +92,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
             requiredFeatures: ['hit-test'],
             optionalFeatures: ['dom-overlay'],
-            domOverlay: { root: document.body }
+            domOverlay: { root: overlay }
         });
 
         app.xr.on('start', async function () {
