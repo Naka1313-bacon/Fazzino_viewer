@@ -89,17 +89,32 @@ reticle.model.material = reticleMat;
 reticle.setLocalScale(0.2, 0.2, 0.2);
 app.root.addChild(reticle);
 
+// 既存コード省略
+
 document.getElementById('start-ar').addEventListener('click', function () {
     if (app.xr.isAvailable(pc.XRTYPE_AR)) {
-        // dom-overlayを使わずに単純なAR開始
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
             requiredFeatures: ['hit-test']
         });
 
         app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
-            const session = app.xr.session;
 
+            // AR開始後に入力デバイスを再初期化
+            if (app.touch) {
+                app.touch.detach();
+            }
+            app.touch = new pc.TouchDevice(canvas);
+
+            // Touchイベント設定
+            app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
+                if (event.touches.length > 0) {
+                    console.log('タッチ検出:', event.touches[0].x, event.touches[0].y);
+                    placeModelRequested = true;
+                }
+            });
+
+            const session = app.xr.session;
             const viewerSpace = await session.requestReferenceSpace('viewer');
             localReferenceSpace = await session.requestReferenceSpace('local-floor');
 
@@ -108,17 +123,8 @@ document.getElementById('start-ar').addEventListener('click', function () {
             } catch (err) {
                 console.error("ヒットテストソース取得エラー:", err);
             }
-
-            // PlayCanvasのtouchイベントでタッチ取得
-            app.touch.on(pc.EVENT_TOUCHSTART, function (event) {
-                if (event.touches.length > 0) {
-                    console.log('タッチ開始:', event.touches[0].x, event.touches[0].y);
-                    placeModelRequested = true;
-                }
-            });
         });
 
-        // ARセッション中の毎フレーム処理
         app.xr.on('update', function (xrFrame) {
             if (!hitTestSource || !xrFrame || !localReferenceSpace) return;
 
@@ -142,8 +148,6 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         entity.enabled = true;
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
-                        // 必要ならreticleを非表示
-                        // reticle.enabled = false;
                     }
                 }
             } else {
@@ -166,3 +170,4 @@ document.getElementById('start-ar').addEventListener('click', function () {
 app.on('update', function (dt) {
     // 通常シーン更新処理
 });
+
