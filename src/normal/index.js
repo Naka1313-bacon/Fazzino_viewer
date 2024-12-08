@@ -41,7 +41,10 @@ entity.enabled = false; // 初期は非表示
 
 // Add a camera
 var camera = new pc.Entity('camera');
-camera.addComponent('camera', {});
+camera.addComponent('camera', {
+    clearFlags: pc.CLEARFLAG_DEPTH_ONLY,
+    clearColor: new pc.Color(0, 0, 0, 0)
+});
 camera.addComponent('script');
 camera.script.create('orbitCamera', {
     attributes: {
@@ -50,7 +53,7 @@ camera.script.create('orbitCamera', {
 });
 camera.script.create('orbitCameraInputMouse');
 camera.script.create('orbitCameraInputTouch');
-camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
+
 
 
 app.root.addChild(camera);
@@ -63,18 +66,6 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
         return;
     }
     entity.gsplat.asset = asset;
-    const material = new pc.StandardMaterial();
-    material.diffuse = new pc.Color(1, 1, 1);
-    material.emissive = new pc.Color(1, 1, 1); // 発光させる
-    material.emissiveIntensity = 1;
-    material.blendType = pc.BLEND_NONE;
-    material.opacity = 1;
-    material.update();
-
-    asset.ready(function (resource) {
-    entity.gsplat.instance.material = material;
-    }
-);
 });
 
 let hitTestSource = null;
