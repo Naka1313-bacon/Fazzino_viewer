@@ -69,7 +69,7 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
     asset.ready(function (resource) {
         console.log(entity.gsplat.instance.material)
-    entity.gsplat.instance.material.gsplatInstance.material = material;
+    entity.gsplat.instance.material.meshInstance.gsplatInstance.material = material;
     console.log(entity.gsplat.instance.material)
     }
 );
