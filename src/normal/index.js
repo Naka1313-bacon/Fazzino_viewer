@@ -52,8 +52,6 @@ camera.script.create('orbitCameraInputMouse');
 camera.script.create('orbitCameraInputTouch');
 camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
 
-const worldLayer = app.scene.layers.getLayerByName("World");
-camera.camera.layers = [worldLayer.id];
 
 app.root.addChild(camera);
 
