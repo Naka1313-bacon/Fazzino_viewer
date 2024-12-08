@@ -95,61 +95,46 @@ document.getElementById('start-ar').addEventListener('click', function () {
             domOverlay: { root: overlay }
         });
 
-        app.xr.on('start', async function () {
+        app.xr.on('start', function () {
             console.log("ARセッションが開始されました");
-            const session = app.xr.session;
-
-            // localReferenceSpaceとhitTestSourceを取得
-            const viewerSpace = await session.requestReferenceSpace('viewer');
-            localReferenceSpace = await session.requestReferenceSpace('local-floor');
-
-            try {
-                hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-                console.log("hitTestSource取得成功");
-            } catch (err) {
-                console.error("ヒットテストソース取得エラー:", err);
-            }
-
-            // ポインターイベントでモデル配置要求を受け付け
-            overlay.addEventListener('pointerdown', function (event) {
-                console.log('pointerdown発生:', event.clientX, event.clientY);
+            
+            // WebXR input events
+            // ユーザーが画面をタップ(=select)した時に呼ばれる
+            app.xr.input.on('select', function (inputSource) {
+                console.log('select event detected');
+                // タップされたのでモデル配置要求をセット
                 placeModelRequested = true;
-            }, { passive: true });
+            });
         });
-
-        // ARセッション中の毎フレーム処理
+        
+        // 毎フレームのヒットテスト処理
         app.xr.on('update', function (xrFrame) {
             if (!hitTestSource || !xrFrame || !localReferenceSpace) return;
-
+        
             const hitResults = xrFrame.getHitTestResults(hitTestSource);
             if (hitResults.length > 0) {
                 const hitPose = hitResults[0].getPose(localReferenceSpace);
                 if (hitPose) {
-                    // ヒット結果がある場合レティクルを表示・位置更新
                     reticle.enabled = true;
                     reticle.setPosition(
                         hitPose.transform.position.x,
                         hitPose.transform.position.y,
                         hitPose.transform.position.z
                     );
-
-                    // モデル配置要求があれば現在のreticle位置へモデル配置
+        
                     if (placeModelRequested) {
                         entity.setPosition(
                             hitPose.transform.position.x,
                             hitPose.transform.position.y,
                             hitPose.transform.position.z
                         );
-                        entity.enabled = true; // モデル表示
+                        entity.enabled = true;
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
-
-                        // モデル配置後、reticleを消したい場合
-                        reticle.enabled = false;
+                        // 必要ならreticle.enabled = false;でレティクル非表示
                     }
                 }
             } else {
-                // ヒットがない場合はレティクル非表示
                 reticle.enabled = false;
             }
         });
