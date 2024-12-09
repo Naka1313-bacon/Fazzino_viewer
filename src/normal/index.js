@@ -66,7 +66,7 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
     asset.ready(function (resource) {
         console.log(entity.gsplat.instance.material)
-    entity.gsplat.instance.material.blendType = pc.BLEND_MULTIPLICATIVE;
+    entity.gsplat.instance.material.blendType = pc.BLEND_PREMULTIPLIED;
     entity.gsplat.instance.material.update();
     console.log(entity.gsplat.instance.material)
     }
@@ -98,6 +98,8 @@ document.getElementById('start-ar').addEventListener('click', function () {
             requiredFeatures: ['hit-test'] // ヒットテストが必須
         });
         camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
+        var light = app.root.findByName('light');
+        light.light.intensity = 0.5;
         app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
             const session = app.xr.session;
