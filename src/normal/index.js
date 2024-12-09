@@ -5,7 +5,6 @@ import { registerOrbitCameraScript, registerOrbitCameraInputMouseScript, registe
 const canvas = document.getElementById("modelContainer");
 const app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), touch: new pc.TouchDevice(canvas) });
 registerRotatorScript(app);
-registerARScript(app);
 registerOrbitCameraScript(app);
 registerOrbitCameraInputMouseScript(app);
 registerOrbitCameraInputTouchScript(app);
