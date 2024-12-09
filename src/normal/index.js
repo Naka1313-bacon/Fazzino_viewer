@@ -49,7 +49,7 @@ camera.script.create('orbitCamera', {
 });
 camera.script.create('orbitCameraInputMouse');
 camera.script.create('orbitCameraInputTouch');
-camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
+
 
 
 app.root.addChild(camera);
@@ -66,8 +66,7 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
     asset.ready(function (resource) {
         console.log(entity.gsplat.instance.material)
-    entity.gsplat.instance.material.alphaTest = 1;
-    entity.gsplat.instance.material.alphaToCoverage = true;
+
 
     console.log(entity.gsplat.instance.material)
     }
@@ -98,7 +97,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
         camera.camera.startXr(pc.XRTYPE_AR, pc.XRSPACE_LOCALFLOOR, {
             requiredFeatures: ['hit-test'] // ヒットテストが必須
         });
-
+        camera.camera.clearColor = new pc.Color(0, 0, 0, 0);
         app.xr.on('start', async function () {
             console.log("ARセッションが開始されました");
             const session = app.xr.session;
@@ -147,7 +146,7 @@ document.getElementById('start-ar').addEventListener('click', function () {
                         console.log("モデル配置位置:", hitPose.transform.position);
                         placeModelRequested = false;
                         // 必要に応じてreticleを非表示
-                        // reticle.enabled = false;
+                        reticle.enabled = false;
                     }
                 }
             } else {
