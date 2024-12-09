@@ -63,13 +63,13 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
         return;
     }
     entity.gsplat.asset = asset;
-    const material = new pc.StandardMaterial();
-    material.opacity = 1;
-    material.update();
+
 
     asset.ready(function (resource) {
         console.log(entity.gsplat.instance.material)
-    entity.gsplat.instance.material.meshInstance[0].gsplatInstance.material = material;
+    entity.gsplat.instance.material.alphaTest = 1;
+    entity.gsplat.instance.material.alphaToCoverage = true;
+
     console.log(entity.gsplat.instance.material)
     }
 );
