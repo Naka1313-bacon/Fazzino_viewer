@@ -66,9 +66,8 @@ app.assets.loadFromUrl(modelUrl, 'gsplat', function (err, asset) {
 
     asset.ready(function (resource) {
         console.log(entity.gsplat.instance.material)
-        entity.gsplat.instance.material.depthWrite = true;
-        entity.gsplat.instance.material.blendType = pc.BLEND_NONE;
-        entity.gsplat.instance.material.update();
+    entity.gsplat.instance.material.blendType = pc.BLEND_PREMULTIPLIED;
+    entity.gsplat.instance.material.update();
     console.log(entity.gsplat.instance.material)
     }
 );
